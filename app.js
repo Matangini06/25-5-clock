@@ -1,142 +1,273 @@
-function App() {
-	const [displayTime, setDisplayTime] = React.useState(25*60);
-	const [breakTime, setBreakTime] = React.useState(5 * 60);
-	const [sessionTime, sessionTime] = React.useState(25 * 60);
-	const [timeOn, setTimeOn] = React.useState(false);
-	const [onBreak, setOnBreak] = React.useState(false);
-	const [breakAudio, setBreakAudio] = React.useState(new Audio("./breakTime.mp3"));
-
-	const playBreakSound = () => {
-		breakAudio.currentTime = 0;
-		breakAudio.play();
-	}
-
-	const formatTime = (time) => {
-		let minutes = Math.floor(timme/60);
-		let seconds = time % 60;
-		return(
-			(minutes < 10 ? "0" + minutes : minutes) + 
-		    ":" +
-		    (minutes < 10 ? "0" + seconds :seconds)
-		);
-
-	};
-
-	const changeTime = (amount, type) => {
-		if(type == 'break') {
-			if breakTime <= 60 && amount < 0 {
-				return;
-			}
-			setBreakTime((prev) => prev + amount);
-		}
-		else{
-			if sessionTime <= 60 && amount < 0 {
-				return;
-			}
-			setSessionTime((prev)  => prev + amount);
-			if(timeOn) {
-				setDisplayTime(sessionTime + amount);
-			}
-		};
-	};
-
-    const controlTime = () => {
-    	let second = 1000;
-    	let date = new Date().getTime();
-    	let nextDate = new Date().getTime() + second;
-    	let onBreakVariable = onBreak;
-      if(!timeOn){
-      	let interval = setInterval{() => {
-      		date = new Date().getTime();
-      		if(date > nextDate){
-      			setDisplayTime(prev => {
-      				if(prev <= 0 && !onBreakVariable){
-      					playBreakSound();
-      					onBreakVariable=true;
-      					setOnBreak(true)
-      					return breakTime;
-      				}else if(prev <= 0 && onBreakVariable){
-      					playBreakSound();
-      					onBreakVariable=false;
-      					setOnBreak(false)
-      					return breakTime;
-      				}
-      				return prev - 1;
-      			});
-      		}
-      		nextDate +=second;
-      	}, 30};
-      	localStorage.clear();
-      	localStorage.setItem("interval-id", interval)
-      }
-
-      if(timeOn){
-      	clearInterval(localStorage.getItem("interval-id"));
-      }
-
-      setTimeOn(!timeOn)
+(function () {
+  window.accurateInterval = function (fn, time) {
+    var cancel, nextAt, timeout, wrapper;
+    nextAt = new Date().getTime() + time;
+    timeout = null;
+    wrapper = function () {
+      nextAt += time;
+      timeout = setTimeout(wrapper, nextAt - new Date().getTime());
+      return fn();
     };
-	const resetTime = () => {
-		setDisplayTime(25 * 60);
-		setBreakTime(5 * 60);
-		setSessionTime(25 * 60);
-	};
-	
+    cancel = function () {
+      return clearTimeout(timeout);
+    };
+    timeout = setTimeout(wrapper, nextAt - new Date().getTime());
+    return {
+      cancel: cancel };
 
-	return(
-		 <div className="center-align">
-		    <h1>25 + 5 Clock</h1>
-		    <div className="dual-container">
-		       <length 
-		        title={"break length"} 
-		        changeTime={changeTime}  
-		        type={"break"} 
-		        time={breakTime} 
-		        formatTime={formatTime}
-		        />
-		   
-		       <length 
-		        title={"break length"} 
-		        changeTime={changeTime}  
-		        type={"session"} 
-		        time={sessionTime} 
-		        formatTime={formatTime}
-		       />
-		     </div>
-		     <h3>(onBreak ? "Break" : "session")</h3>
-	        <h1>formatTime(displayTime)</h1>
-	        <button className="btn-large deep-purple lighten-2" onClick={controlTime}>
-	             {timeOn ? (
-	             	<i className="material-icons">pause_circle_filled</i>
-	             ); }
-	                <i className="material-icons">pause_circle_filled</i>
-	              )}
-	        </button>
-	        <button className="btn-large deep-purple lighten-2" onClick={resetTime}>
-	            <i className="material-icons">autorenew</i>
-	        </button>
-	      </div>
-	);
-}
+  };
+}).call(this);
 
-function Length({title, changeTime, type, time, foematTime}) {
-	rturn (
-		<div>
-		  <h3>(title)</h3>
-		  <div className="time=sets">
-		     <button className="btn=small deep-purple lighten-2"
-		          onClick={() => changeTime(-60, type)}
-		     >
-		        <i className="material-icons">arrow_downward</i>
-		     </button>
-		     <h3>(formatTime(time))</h3>
-		     <button className="btn=small deep-purple lighten-2"
-		           onClick={() => changeTime(60, type)}
-		     >
-		        <i className="material-icons">arrow_upward</i>
-		     </button>
-		   </div>
-	);
-}
+const projectName = '25-5-clock';
 
-ReactDOM.render(<App/>, document.getElementById("root"));
+
+const accurateInterval = function (fn, time) {
+  var cancel, nextAt, timeout, wrapper;
+  nextAt = new Date().getTime() + time;
+  timeout = null;
+  wrapper = function () {
+    nextAt += time;
+    timeout = setTimeout(wrapper, nextAt - new Date().getTime());
+    return fn();
+  };
+  cancel = function () {
+    return clearTimeout(timeout);
+  };
+  timeout = setTimeout(wrapper, nextAt - new Date().getTime());
+  return {
+    cancel: cancel };
+
+};
+
+// COMPONENTS:
+class TimerLengthControl extends React.Component {
+  render() {
+    return /*#__PURE__*/(
+      React.createElement("div", { className: "length-control" }, /*#__PURE__*/
+      React.createElement("div", { id: this.props.titleID }, this.props.title), /*#__PURE__*/
+      React.createElement("button", {
+        className: "btn-level",
+        id: this.props.minID,
+        onClick: this.props.onClick,
+        value: "-" }, /*#__PURE__*/
+
+      React.createElement("i", { className: "fa fa-arrow-down fa-2x" })), /*#__PURE__*/
+
+      React.createElement("div", { className: "btn-level", id: this.props.lengthID },
+      this.props.length), /*#__PURE__*/
+
+      React.createElement("button", {
+        className: "btn-level",
+        id: this.props.addID,
+        onClick: this.props.onClick,
+        value: "+" }, /*#__PURE__*/
+
+      React.createElement("i", { className: "fa fa-arrow-up fa-2x" }))));
+
+
+
+  }}
+
+
+class Timer extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      brkLength: 5,
+      seshLength: 25,
+      timerState: 'stopped',
+      timerType: 'Session',
+      timer: 1500,
+      intervalID: '',
+      alarmColor: { color: 'white' } };
+
+    this.setBrkLength = this.setBrkLength.bind(this);
+    this.setSeshLength = this.setSeshLength.bind(this);
+    this.lengthControl = this.lengthControl.bind(this);
+    this.timerControl = this.timerControl.bind(this);
+    this.beginCountDown = this.beginCountDown.bind(this);
+    this.decrementTimer = this.decrementTimer.bind(this);
+    this.phaseControl = this.phaseControl.bind(this);
+    this.warning = this.warning.bind(this);
+    this.buzzer = this.buzzer.bind(this);
+    this.switchTimer = this.switchTimer.bind(this);
+    this.clockify = this.clockify.bind(this);
+    this.reset = this.reset.bind(this);
+  }
+  setBrkLength(e) {
+    this.lengthControl(
+    'brkLength',
+    e.currentTarget.value,
+    this.state.brkLength,
+    'Session');
+
+  }
+  setSeshLength(e) {
+    this.lengthControl(
+    'seshLength',
+    e.currentTarget.value,
+    this.state.seshLength,
+    'Break');
+
+  }
+  lengthControl(stateToChange, sign, currentLength, timerType) {
+    if (this.state.timerState === 'running') {
+      return;
+    }
+    if (this.state.timerType === timerType) {
+      if (sign === '-' && currentLength !== 1) {
+        this.setState({ [stateToChange]: currentLength - 1 });
+      } else if (sign === '+' && currentLength !== 60) {
+        this.setState({ [stateToChange]: currentLength + 1 });
+      }
+    } else if (sign === '-' && currentLength !== 1) {
+      this.setState({
+        [stateToChange]: currentLength - 1,
+        timer: currentLength * 60 - 60 });
+
+    } else if (sign === '+' && currentLength !== 60) {
+      this.setState({
+        [stateToChange]: currentLength + 1,
+        timer: currentLength * 60 + 60 });
+
+    }
+  }
+  timerControl() {
+    if (this.state.timerState === 'stopped') {
+      this.beginCountDown();
+      this.setState({ timerState: 'running' });
+    } else {
+      this.setState({ timerState: 'stopped' });
+      if (this.state.intervalID) {
+        this.state.intervalID.cancel();
+      }
+    }
+  }
+  beginCountDown() {
+    this.setState({
+      intervalID: accurateInterval(() => {
+        this.decrementTimer();
+        this.phaseControl();
+      }, 1000) });
+
+  }
+  decrementTimer() {
+    this.setState({ timer: this.state.timer - 1 });
+  }
+  phaseControl() {
+    let timer = this.state.timer;
+    this.warning(timer);
+    this.buzzer(timer);
+    if (timer < 0) {
+      if (this.state.intervalID) {
+        this.state.intervalID.cancel();
+      }
+      if (this.state.timerType === 'Session') {
+        this.beginCountDown();
+        this.switchTimer(this.state.brkLength * 60, 'Break');
+      } else {
+        this.beginCountDown();
+        this.switchTimer(this.state.seshLength * 60, 'Session');
+      }
+    }
+  }
+  warning(_timer) {
+    if (_timer < 61) {
+      this.setState({ alarmColor: { color: '#a50d0d' } });
+    } else {
+      this.setState({ alarmColor: { color: 'white' } });
+    }
+  }
+  buzzer(_timer) {
+    if (_timer === 0) {
+      this.audioBeep.play();
+    }
+  }
+  switchTimer(num, str) {
+    this.setState({
+      timer: num,
+      timerType: str,
+      alarmColor: { color: 'white' } });
+
+  }
+  clockify() {
+    let minutes = Math.floor(this.state.timer / 60);
+    let seconds = this.state.timer - minutes * 60;
+    seconds = seconds < 10 ? '0' + seconds : seconds;
+    minutes = minutes < 10 ? '0' + minutes : minutes;
+    return minutes + ':' + seconds;
+  }
+  reset() {
+    this.setState({
+      brkLength: 5,
+      seshLength: 25,
+      timerState: 'stopped',
+      timerType: 'Session',
+      timer: 1500,
+      intervalID: '',
+      alarmColor: { color: 'white' } });
+
+    if (this.state.intervalID) {
+      this.state.intervalID.cancel();
+    }
+    this.audioBeep.pause();
+    this.audioBeep.currentTime = 0;
+  }
+  render() {
+    return /*#__PURE__*/(
+      React.createElement("div", null, /*#__PURE__*/
+      React.createElement("div", { className: "main-title" }, "25 + 5 Clock"), /*#__PURE__*/
+      React.createElement(TimerLengthControl, {
+        addID: "break-increment",
+        length: this.state.brkLength,
+        lengthID: "break-length",
+        minID: "break-decrement",
+        onClick: this.setBrkLength,
+        title: "Break Length",
+        titleID: "break-label" }), /*#__PURE__*/
+
+      React.createElement(TimerLengthControl, {
+        addID: "session-increment",
+        length: this.state.seshLength,
+        lengthID: "session-length",
+        minID: "session-decrement",
+        onClick: this.setSeshLength,
+        title: "Session Length",
+        titleID: "session-label" }), /*#__PURE__*/
+
+      React.createElement("div", { className: "timer", style: this.state.alarmColor }, /*#__PURE__*/
+      React.createElement("div", { className: "timer-wrapper" }, /*#__PURE__*/
+      React.createElement("div", { id: "timer-label" }, this.state.timerType), /*#__PURE__*/
+      React.createElement("div", { id: "time-left" }, this.clockify()))), /*#__PURE__*/
+
+
+      React.createElement("div", { className: "timer-control" }, /*#__PURE__*/
+      React.createElement("button", { id: "start_stop", onClick: this.timerControl }, /*#__PURE__*/
+      React.createElement("i", { className: "fa fa-play fa-2x" }), /*#__PURE__*/
+      React.createElement("i", { className: "fa fa-pause fa-2x" })), /*#__PURE__*/
+
+      React.createElement("button", { id: "reset", onClick: this.reset }, /*#__PURE__*/
+      React.createElement("i", { className: "fa fa-refresh fa-2x" }))), /*#__PURE__*/
+
+
+      React.createElement("div", { className: "author" },
+      ' ', "Designed and Coded by ", /*#__PURE__*/
+      React.createElement("br", null), /*#__PURE__*/
+      React.createElement("a", { href: "https://goo.gl/6NNLMG", target: "_blank" }, "Peter Weinberg")), /*#__PURE__*/
+
+
+
+      React.createElement("audio", {
+        id: "beep",
+        preload: "auto",
+        ref: audio => {
+          this.audioBeep = audio;
+        },
+        src: "https://raw.githubusercontent.com/freeCodeCamp/cdn/master/build/testable-projects-fcc/audio/BeepSound.wav" })));
+
+
+
+  }}
+
+
+ReactDOM.render( /*#__PURE__*/React.createElement(Timer, null), document.getElementById('app'));
