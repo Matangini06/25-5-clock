@@ -253,7 +253,7 @@ class Timer extends React.Component {
       React.createElement("div", { className: "author" },
       ' ', "Designed and Coded by ", /*#__PURE__*/
       React.createElement("br", null), /*#__PURE__*/
-      React.createElement("a", { href: "https://goo.gl/6NNLMG", target: "_blank" }, "Peter Weinberg")), /*#__PURE__*/
+      React.createElement("a", { href: "https://goo.gl/6NNLMG", target: "_blank" }, "Matangini Mohanty")), /*#__PURE__*/
 
 
 
