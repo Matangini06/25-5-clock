@@ -11,7 +11,7 @@ body #container {
   align-items: center;
 }
 body #container .main-title {
-  font-size: 50px;
+  font-size: 70px;
   margin-bottom: 20px;
 }
 body #container .length-control {
@@ -30,19 +30,19 @@ body #container .length-control {
 }
 body #container .btn-level .btn-level:nth-child(3),
 body #container .length-control .btn-level:nth-child(3) {
-  width: 40px;
+  width: 70px;
 }
 body #container .timer {
   border: 7px solid #13353a;
   margin: 20px auto 10px auto;
-  width: 270px;
-  height: 160px;
+  width: 300px;
+  height: 200px;
   border-radius: 50px;
   position: relative;
 }
 body #container .timer .timer-wrapper {
   position: absolute;
-  width: 190px;
+  width: 250px;
   height: 110px;
   left: 50%;
   top: 50%;
